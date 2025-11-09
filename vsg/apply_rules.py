@@ -3,6 +3,7 @@
 import os
 import shutil
 import stat
+import sys
 
 from . import config, junit, rule_list, utils, vhdlFile
 from .exceptions import ClassifyError, ConfigurationError
@@ -120,7 +121,11 @@ def apply_rules(commandLineArguments, oConfig, tIndexFileName):
         oRules.fix(commandLineArguments.fix_phase, commandLineArguments.skip_phase, fix_only)
 
         if oRules.had_violations:
-            write_vhdl_file(oVhdlFile, oConfig.dConfig)
+            if commandLineArguments.stdout:
+                write_to_stdout(oVhdlFile, oConfig.dConfig)
+                exit(0)
+            else:
+                write_vhdl_file(oVhdlFile, oConfig.dConfig)
 
     oRules.clear_violations()
     oRules.check_rules(
@@ -159,6 +164,17 @@ def write_vhdl_file(oVhdlFile, dConfig):
             os.remove(tmpfile)
         except FileNotFoundError:
             pass
+
+
+def write_to_stdout(oVhdlFile, dConfig):
+    try:
+        linesep = dConfig.get("linesep", os.linesep)
+        lines_to_write = oVhdlFile.get_lines()[1:]
+        output_string = linesep.join(lines_to_write)
+        print(output_string, end=linesep, file=sys.stdout)
+    except Exception as err:
+        print("Error writing to stdout:", err, file=sys.stderr)
+        raise
 
 
 def create_junit_testcase(sVhdlFileName, oException):

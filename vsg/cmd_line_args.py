@@ -67,6 +67,12 @@ def parse_command_line_arguments():
         default=False,
         help="Read VHDL input from stdin, disables all other file selections, disables multiprocessing",
     )
+    parser.add_argument(
+        "--stdout",
+        action="store_true",
+        default=False,
+        help="Write modified VHDL to stdout. Prevents summary / syntastic output.",
+    )
     parser.add_argument("--force_fix", action="store_true", default=False, help="ALPHA: Apply fixes if syntax errors are detected.")
 
     add_quality_report_argument(parser)
